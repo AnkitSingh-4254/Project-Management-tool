@@ -1,5 +1,5 @@
 /**
- * Signup Page Component for Mini Project Management Tool (MPMT)
+ * Signup Page Component for Project Manager App
  * Provides user registration interface with TailwindCSS styling
  */
 
@@ -106,7 +106,7 @@ const Signup= () => {
             Create Account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join MPMT and start managing your projects
+            Join Project Manager App and start managing your projects
           </p>
         </div>
 
@@ -302,7 +302,7 @@ const Signup= () => {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Mini Project Management Tool (MPMT) v1.0
+            Project Manager App v1.0
           </p>
           <p className="text-xs text-gray-500 mt-1">
             B.Tech CS Internship Project

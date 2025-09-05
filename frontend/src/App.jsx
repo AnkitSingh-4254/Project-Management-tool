@@ -1,5 +1,5 @@
 /**
- * Main App Component for Mini Project Management Tool (MPMT)
+ * Main App Component for Project Manager App
  * Handles routing, authentication, and layout structure
  */
 

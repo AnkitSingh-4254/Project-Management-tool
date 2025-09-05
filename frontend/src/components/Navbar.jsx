@@ -1,6 +1,6 @@
 /**
- * Navbar Component for Mini Project Management Tool (MPMT)
- * Responsive navigation bar with TailwindCSS styling
+ * Navbar Component for Project Manager App
+ * Simple navigation bar with NO dropdown functionality
  */
 
 import React, { useState } from 'react';
@@ -13,8 +13,7 @@ import {
   LogOut, 
   User, 
   Menu, 
-  X,
-  Settings
+  X
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -22,7 +21,6 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -30,7 +28,6 @@ const Navbar = () => {
       navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
-      // Navigate anyway
       navigate('/login');
     }
   };
@@ -64,8 +61,8 @@ const Navbar = () => {
                 <CheckSquare className="h-6 w-6 text-white" />
               </div>
               <div>
-                <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">MPMT</span>
-                <span className="hidden sm:block text-xs text-gray-500 ml-2 font-medium">Mini Project Management</span>
+                <span className="font-bold text-xl bg-gradient-primary bg-clip-text text-transparent">Project Manager</span>
+                <span className="hidden sm:block text-xs text-gray-500 ml-2 font-medium">App</span>
               </div>
             </Link>
           </div>
@@ -86,69 +83,16 @@ const Navbar = () => {
             </NavLink>
           </div>
 
-          {/* User Menu */}
+          {/* Right side - User info and mobile menu */}
           <div className="flex items-center space-x-4">
-            {/* User Profile Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              >
-                <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                  <span className="text-white font-medium text-sm">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="hidden sm:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-              </button>
-
-              {/* User Dropdown Menu */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                    {user?.department && (
-                      <p className="text-xs text-gray-500">{user.department}</p>
-                    )}
-                  </div>
-                  
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      // Navigate to profile settings (you can implement this later)
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <User className="h-4 w-4 mr-3" />
-                    Profile Settings
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      // Navigate to app settings (you can implement this later)
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <Settings className="h-4 w-4 mr-3" />
-                    App Settings
-                  </button>
-                  
-                  <hr className="my-1" />
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
-                  >
-                    <LogOut className="h-4 w-4 mr-3" />
-                    Sign Out
-                  </button>
-                </div>
-              )}
+            {/* Simple User Display - NO CLICKING */}
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+                <span className="text-white font-medium text-sm">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <span className="hidden sm:block text-sm font-medium text-gray-900">{user?.name}</span>
             </div>
 
             {/* Mobile Menu Button */}
@@ -187,7 +131,6 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  // Navigate to profile (you can implement this later)
                 }}
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
               >
@@ -210,14 +153,11 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Overlay for mobile menu */}
-      {(isMobileMenuOpen || isUserMenuOpen) && (
+      {/* Mobile menu overlay */}
+      {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-25 md:hidden"
-          onClick={() => {
-            setIsMobileMenuOpen(false);
-            setIsUserMenuOpen(false);
-          }}
+          className="fixed inset-0 z-30 bg-black bg-opacity-25 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
     </nav>

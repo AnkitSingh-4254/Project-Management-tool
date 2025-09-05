@@ -1,5 +1,5 @@
 /**
- * Authentication Context for Mini Project Management Tool (MPMT)
+ * Authentication Context for Project Manager App
  * Manages user authentication state and provides auth-related functions
  */
 

@@ -1,12 +1,12 @@
 /**
- * Dashboard Page Component for Mini Project Management Tool (MPMT)
+ * Dashboard Page Component for Project Manager App
  * Main dashboard showing projects and tasks overview with TailwindCSS styling
  */
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { projectAPI, taskAPI, Project, Task } from '../services/api';
+import { projectAPI, taskAPI } from '../services/api';
 import { 
   Calendar, 
   CheckSquare, 
@@ -18,7 +18,7 @@ import {
   Users
 } from 'lucide-react';
 
-const Dashboard= () => {
+const Dashboard = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [myTasks, setMyTasks] = useState([]);
@@ -61,7 +61,7 @@ const Dashboard= () => {
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Todo':
         return 'status-badge-todo';
@@ -74,7 +74,7 @@ const Dashboard= () => {
     }
   };
 
-  const getPriorityBadgeClass = (priority: string) => {
+  const getPriorityBadgeClass = (priority) => {
     switch (priority) {
       case 'Low':
         return 'priority-badge-low';
@@ -89,7 +89,7 @@ const Dashboard= () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       month: 'short',
@@ -98,7 +98,7 @@ const Dashboard= () => {
     });
   };
 
-  const isOverdue = (dueDate: string, status: string) => {
+  const isOverdue = (dueDate, status) => {
     return status !== 'Done' && new Date(dueDate) < new Date();
   };
 

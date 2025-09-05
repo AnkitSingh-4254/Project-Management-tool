@@ -1,6 +1,6 @@
 /**
- * Projects Page Component for Mini Project Management Tool (MPMT)
- * Provides full CRUD operations for projects
+ * Projects Page Component for Project Manager App
+ * Provides comprehensive project management with all required fields and CRUD operations
  */
 
 import React, { useState, useEffect } from 'react';
@@ -193,11 +193,18 @@ const Projects = () => {
     <div className="min-h-screen bg-gradient-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
             <p className="text-gray-600">Manage your projects with full CRUD operations</p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-primary"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Project
+          </button>
         </div>
 
         {error && (
@@ -397,7 +404,7 @@ const Projects = () => {
                     </label>
                     <select
                       value={projectForm.status}
-                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value,})}
+                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value})}
                       className="input-field"
                     >
                       <option value="Planning">Planning</option>
@@ -414,7 +421,7 @@ const Projects = () => {
                     </label>
                     <select
                       value={projectForm.priority}
-                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value,})}
+                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>
@@ -504,7 +511,7 @@ const Projects = () => {
                     </label>
                     <select
                       value={projectForm.status}
-                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value,})}
+                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value})}
                       className="input-field"
                     >
                       <option value="Planning">Planning</option>
@@ -521,7 +528,7 @@ const Projects = () => {
                     </label>
                     <select
                       value={projectForm.priority}
-                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value,})}
+                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>

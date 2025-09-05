@@ -1,5 +1,5 @@
 /**
- * Login Page Component for Mini Project Management Tool (MPMT)
+ * Login Page Component for Project Manager App
  * Provides user authentication interface with TailwindCSS styling
  */
 
@@ -79,7 +79,7 @@ const Login = () => {
             Welcome Back
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to your MPMT account
+            Sign in to your Project Manager App account
           </p>
         </div>
 
@@ -195,7 +195,7 @@ const Login = () => {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Mini Project Management Tool (MPMT) v1.0
+            Project Manager App v1.0
           </p>
           <p className="text-xs text-gray-500 mt-1">
             B.Tech CS Internship Project

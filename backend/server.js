@@ -103,12 +103,28 @@ const startServer = async () => {
 };
 
 // Handle graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
     console.log('🔄 SIGTERM received, shutting down gracefully...');
-    mongoose.connection.close(() => {
+    try {
+        await mongoose.connection.close();
         console.log('📊 MongoDB connection closed.');
         process.exit(0);
-    });
+    } catch (error) {
+        console.error('❌ Error closing MongoDB connection:', error);
+        process.exit(1);
+    }
+});
+
+process.on('SIGINT', async () => {
+    console.log('🔄 SIGINT received, shutting down gracefully...');
+    try {
+        await mongoose.connection.close();
+        console.log('📊 MongoDB connection closed.');
+        process.exit(0);
+    } catch (error) {
+        console.error('❌ Error closing MongoDB connection:', error);
+        process.exit(1);
+    }
 });
 
 // Start the application

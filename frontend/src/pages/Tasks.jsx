@@ -1,11 +1,11 @@
 /**
- * Tasks Page Component for Mini Project Management Tool (MPMT)
+ * Tasks Page Component for Project Manager App
  * Provides full CRUD operations for tasks with all required fields
  */
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { taskAPI, projectAPI, Task, Project, authAPI, User } from '../services/api';
+import { taskAPI, projectAPI, authAPI } from '../services/api';
 import { 
   Plus, 
   Edit2, 
@@ -13,13 +13,11 @@ import {
   Calendar, 
   User,
   CheckSquare,
-  Clock,
-  Filter,
   Search,
   X
 } from 'lucide-react';
 
-const Tasks= () => {
+const Tasks = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -130,7 +128,7 @@ const Tasks= () => {
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = async (taskId) => {
     if (!window.confirm('Are you sure you want to delete this task?')) {
       return;
     }
@@ -145,7 +143,7 @@ const Tasks= () => {
     }
   };
 
-  const openEditModal = (task: Task) => {
+  const openEditModal = (task) => {
     setEditingTask(task);
     setTaskForm({
       title: task.title,
@@ -171,7 +169,7 @@ const Tasks= () => {
     });
   };
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'Todo': return 'badge-todo';
       case 'In Progress': return 'badge-progress';
@@ -180,7 +178,7 @@ const Tasks= () => {
     }
   };
 
-  const getPriorityBadgeClass = (priority: string) => {
+  const getPriorityBadgeClass = (priority) => {
     switch (priority) {
       case 'Low': return 'badge-low';
       case 'Medium': return 'badge-medium';
@@ -323,7 +321,7 @@ const Tasks= () => {
                 </div>
 
                 <div className="flex items-center text-sm text-gray-500">
-                  <UserIcon className="h-4 w-4 mr-2" />
+                  <User className="h-4 w-4 mr-2" />
                   {task.assignedTo.name}
                 </div>
 
@@ -402,7 +400,7 @@ const Tasks= () => {
                     </label>
                     <select
                       value={taskForm.status}
-                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value,})}
+                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value})}
                       className="input-field"
                       required
                     >
@@ -465,7 +463,7 @@ const Tasks= () => {
                     </label>
                     <select
                       value={taskForm.priority}
-                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value,})}
+                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>
@@ -543,7 +541,7 @@ const Tasks= () => {
                     </label>
                     <select
                       value={taskForm.status}
-                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value,})}
+                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value})}
                       className="input-field"
                       required
                     >
@@ -589,7 +587,7 @@ const Tasks= () => {
                     </label>
                     <select
                       value={taskForm.priority}
-                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value,})}
+                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>

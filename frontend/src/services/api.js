@@ -1,5 +1,5 @@
 /**
- * API Service for Mini Project Management Tool (MPMT)
+ * API Service for Project Manager App
  * Handles all API communications with the backend server
  */
 
