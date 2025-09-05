@@ -41,7 +41,7 @@ const Signup= () => {
     if (error) setError('');
   };
 
-  const validateForm = (): string | null => {
+  const validateForm = () => {
     if (!formData.name.trim()) return 'Name is required';
     if (formData.name.trim().length < 2) return 'Name must be at least 2 characters';
     if (!formData.email.trim()) return 'Email is required';
