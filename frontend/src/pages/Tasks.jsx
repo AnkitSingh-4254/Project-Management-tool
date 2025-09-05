@@ -1,42 +1,48 @@
 /**
- * Projects Page Component for Mini Project Management Tool (MPMT)
- * Provides full CRUD operations for projects
+ * Tasks Page Component for Mini Project Management Tool (MPMT)
+ * Provides full CRUD operations for tasks with all required fields
  */
 
 import React, { useState, useEffect } from 'react';
-import { projectAPI, Project } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { taskAPI, projectAPI, Task, Project, authAPI, User } from '../services/api';
 import { 
   Plus, 
   Edit2, 
   Trash2, 
   Calendar, 
-  User as UserIcon,
-  Folder,
+  User,
+  CheckSquare,
+  Clock,
+  Filter,
   Search,
-  X,
-  Users
+  X
 } from 'lucide-react';
 
-const Projects: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+const Tasks= () => {
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingTask, setEditingTask] = useState(null);
   const [filters, setFilters] = useState({
     status: 'all',
     priority: 'all',
     search: ''
   });
 
-  const [projectForm, setProjectForm] = useState({
+  const [taskForm, setTaskForm] = useState({
     title: '',
     description: '',
-    status: 'Planning' as 'Planning' | 'In Progress' | 'On Hold' | 'Completed' | 'Cancelled',
-    priority: 'Medium' as 'Low' | 'Medium' | 'High' | 'Urgent',
+    status: 'Todo',
+    assignedTo: '',
+    project: '',
     dueDate: '',
-    tags: [] as string[]
+    priority: 'Medium',
   });
 
   useEffect(() => {
@@ -46,12 +52,24 @@ const Projects: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const projectsRes = await projectAPI.getProjects();
+      const [tasksRes, projectsRes, usersRes] = await Promise.all([
+        taskAPI.getTasks(),
+        projectAPI.getProjects(),
+        authAPI.getUsers()
+      ]);
+
+      if (tasksRes.success && tasksRes.data) {
+        setTasks(tasksRes.data.tasks);
+      }
 
       if (projectsRes.success && projectsRes.data) {
         setProjects(projectsRes.data.projects);
       }
-    } catch (error: any) {
+
+      if (usersRes.success && usersRes.data) {
+        setUsers(usersRes.data.users);
+      }
+    } catch (error) {
       setError('Failed to load data');
       console.error('Load data error:', error);
     } finally {
@@ -59,21 +77,22 @@ const Projects: React.FC = () => {
     }
   };
 
-  const handleCreateProject = async (e: React.FormEvent) => {
+  const handleCreateTask = async (e) => {
     e.preventDefault();
-    if (!projectForm.title) {
-      setError('Please provide a project title');
+    if (!taskForm.title || !taskForm.assignedTo || !taskForm.project || !taskForm.dueDate) {
+      setError('Please fill all required fields');
       return;
     }
 
     try {
-      const response = await projectAPI.createProject({
-        title: projectForm.title,
-        description: projectForm.description,
-        status: projectForm.status,
-        priority: projectForm.priority,
-        dueDate: projectForm.dueDate,
-        tags: projectForm.tags
+      const response = await taskAPI.createTask({
+        title: taskForm.title,
+        description: taskForm.description,
+        status: taskForm.status,
+        assignedTo: taskForm.assignedTo,
+        project: taskForm.project,
+        dueDate: taskForm.dueDate,
+        priority: taskForm.priority
       });
 
       if (response.success) {
@@ -81,102 +100,102 @@ const Projects: React.FC = () => {
         resetForm();
         loadData();
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to create project');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create task');
     }
   };
 
-  const handleUpdateProject = async (e: React.FormEvent) => {
+  const handleUpdateTask = async (e) => {
     e.preventDefault();
-    if (!editingProject) return;
+    if (!editingTask) return;
 
     try {
-      const response = await projectAPI.updateProject(editingProject._id, {
-        title: projectForm.title,
-        description: projectForm.description,
-        status: projectForm.status,
-        priority: projectForm.priority,
-        dueDate: projectForm.dueDate,
-        tags: projectForm.tags
+      const response = await taskAPI.updateTask(editingTask._id, {
+        title: taskForm.title,
+        description: taskForm.description,
+        status: taskForm.status,
+        assignedTo: taskForm.assignedTo,
+        dueDate: taskForm.dueDate,
+        priority: taskForm.priority
       });
 
       if (response.success) {
         setShowEditModal(false);
-        setEditingProject(null);
+        setEditingTask(null);
         resetForm();
         loadData();
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to update project');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update task');
     }
   };
 
-  const handleDeleteProject = async (projectId: string) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) {
+  const handleDeleteTask = async (taskId: string) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) {
       return;
     }
 
     try {
-      const response = await projectAPI.deleteProject(projectId);
+      const response = await taskAPI.deleteTask(taskId);
       if (response.success) {
         loadData();
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to delete project');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to delete task');
     }
   };
 
-  const openEditModal = (project: Project) => {
-    setEditingProject(project);
-    setProjectForm({
-      title: project.title,
-      description: project.description,
-      status: project.status,
-      priority: project.priority,
-      dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split('T')[0] : '',
-      tags: project.tags
+  const openEditModal = (task: Task) => {
+    setEditingTask(task);
+    setTaskForm({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      assignedTo: task.assignedTo._id,
+      project: task.project._id,
+      dueDate: new Date(task.dueDate).toISOString().split('T')[0],
+      priority: task.priority
     });
     setShowEditModal(true);
   };
 
   const resetForm = () => {
-    setProjectForm({
+    setTaskForm({
       title: '',
       description: '',
-      status: 'Planning',
-      priority: 'Medium',
+      status: 'Todo',
+      assignedTo: '',
+      project: '',
       dueDate: '',
-      tags: []
+      priority: 'Medium'
     });
   };
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case 'Planning': return 'bg-gray-100 text-gray-800';
-      case 'In Progress': return 'bg-blue-100 text-blue-800';
-      case 'On Hold': return 'bg-yellow-100 text-yellow-800';
-      case 'Completed': return 'bg-green-100 text-green-800';
-      case 'Cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Todo': return 'badge-todo';
+      case 'In Progress': return 'badge-progress';
+      case 'Done': return 'badge-done';
+      default: return 'badge-todo';
     }
   };
 
   const getPriorityBadgeClass = (priority: string) => {
     switch (priority) {
-      case 'Low': return 'bg-green-100 text-green-700';
-      case 'Medium': return 'bg-yellow-100 text-yellow-700';
-      case 'High': return 'bg-orange-100 text-orange-700';
-      case 'Urgent': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'Low': return 'badge-low';
+      case 'Medium': return 'badge-medium';
+      case 'High': return 'badge-high';
+      case 'Urgent': return 'badge-urgent';
+      default: return 'badge-medium';
     }
   };
 
-  const filteredProjects = projects.filter(project => {
-    const matchesStatus = filters.status === 'all' || project.status === filters.status;
-    const matchesPriority = filters.priority === 'all' || project.priority === filters.priority;
+  const filteredTasks = tasks.filter(task => {
+    const matchesStatus = filters.status === 'all' || task.status === filters.status;
+    const matchesPriority = filters.priority === 'all' || task.priority === filters.priority;
     const matchesSearch = !filters.search || 
-      project.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      project.description.toLowerCase().includes(filters.search.toLowerCase());
+      task.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+      task.description.toLowerCase().includes(filters.search.toLowerCase());
     
     return matchesStatus && matchesPriority && matchesSearch;
   });
@@ -193,11 +212,18 @@ const Projects: React.FC = () => {
     <div className="min-h-screen bg-gradient-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="text-gray-600">Manage your projects with full CRUD operations</p>
+            <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
+            <p className="text-gray-600">Manage your tasks with full CRUD operations</p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-primary"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Task
+          </button>
         </div>
 
         {error && (
@@ -224,11 +250,9 @@ const Projects: React.FC = () => {
                 style={{width: '150px'}}
               >
                 <option value="all">All Status</option>
-                <option value="Planning">Planning</option>
+                <option value="Todo">Todo</option>
                 <option value="In Progress">In Progress</option>
-                <option value="On Hold">On Hold</option>
-                <option value="Completed">Completed</option>
-                <option value="Cancelled">Cancelled</option>
+                <option value="Done">Done</option>
               </select>
             </div>
             
@@ -256,7 +280,7 @@ const Projects: React.FC = () => {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters({...filters, search: e.target.value})}
-                  placeholder="Search projects..."
+                  placeholder="Search tasks..."
                   className="input-field pl-10"
                 />
               </div>
@@ -264,21 +288,21 @@ const Projects: React.FC = () => {
           </div>
         </div>
 
-        {/* Projects Grid */}
+        {/* Tasks Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <div key={project._id} className="card">
+          {filteredTasks.map((task) => (
+            <div key={task._id} className="card">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => openEditModal(project)}
+                    onClick={() => openEditModal(task)}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDeleteProject(project._id)}
+                    onClick={() => handleDeleteTask(task._id)}
                     className="text-red-600 hover:text-red-800"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -286,77 +310,58 @@ const Projects: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{project.description}</p>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{task.description}</p>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(project.status)}`}>
-                    {project.status}
+                  <span className={`badge ${getStatusBadgeClass(task.status)}`}>
+                    {task.status}
                   </span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityBadgeClass(project.priority)}`}>
-                    {project.priority}
+                  <span className={`badge ${getPriorityBadgeClass(task.priority)}`}>
+                    {task.priority}
                   </span>
                 </div>
 
                 <div className="flex items-center text-sm text-gray-500">
                   <UserIcon className="h-4 w-4 mr-2" />
-                  Owner: {project.owner.name}
+                  {task.assignedTo.name}
                 </div>
-
-                {project.dueDate && (
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Due: {new Date(project.dueDate).toLocaleDateString()}
-                  </div>
-                )}
 
                 <div className="flex items-center text-sm text-gray-500">
-                  <Users className="h-4 w-4 mr-2" />
-                  Team: {project.teamMembers.length} members
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Due: {new Date(task.dueDate).toLocaleDateString()}
                 </div>
 
-                {project.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {project.tags.slice(0, 3).map((tag, index) => (
-                      <span 
-                        key={index}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {project.tags.length > 3 && (
-                      <span className="text-xs text-gray-500">+{project.tags.length - 3} more</span>
-                    )}
-                  </div>
-                )}
+                <div className="text-xs text-gray-400">
+                  Project: {task.project.title}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {filteredProjects.length === 0 && (
+        {filteredTasks.length === 0 && (
           <div className="text-center py-12">
-            <Folder className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
-            <p className="text-gray-500 mb-4">Create your first project to get started</p>
+            <CheckSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-500 mb-4">Create your first task to get started</p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="btn-primary"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create Project
+              Create Task
             </button>
           </div>
         )}
 
-        {/* Create Project Modal */}
+        {/* Create Task Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-md w-full max-h-screen overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Create New Project</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Create New Task</h2>
                   <button
                     onClick={() => {setShowCreateModal(false); resetForm();}}
                     className="text-gray-400 hover:text-gray-600"
@@ -365,15 +370,15 @@ const Projects: React.FC = () => {
                   </button>
                 </div>
 
-                <form onSubmit={handleCreateProject} className="space-y-4">
+                <form onSubmit={handleCreateTask} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Title *
                     </label>
                     <input
                       type="text"
-                      value={projectForm.title}
-                      onChange={(e) => setProjectForm({...projectForm, title: e.target.value})}
+                      value={taskForm.title}
+                      onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
                       className="input-field"
                       required
                     />
@@ -384,8 +389,8 @@ const Projects: React.FC = () => {
                       Description
                     </label>
                     <textarea
-                      value={projectForm.description}
-                      onChange={(e) => setProjectForm({...projectForm, description: e.target.value})}
+                      value={taskForm.description}
+                      onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
                       className="input-field"
                       rows={3}
                     />
@@ -393,19 +398,65 @@ const Projects: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
+                      Status *
                     </label>
                     <select
-                      value={projectForm.status}
-                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value as any})}
+                      value={taskForm.status}
+                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value,})}
                       className="input-field"
+                      required
                     >
-                      <option value="Planning">Planning</option>
+                      <option value="Todo">Todo</option>
                       <option value="In Progress">In Progress</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Cancelled">Cancelled</option>
+                      <option value="Done">Done</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned To *
+                    </label>
+                    <select
+                      value={taskForm.assignedTo}
+                      onChange={(e) => setTaskForm({...taskForm, assignedTo: e.target.value})}
+                      className="input-field"
+                      required
+                    >
+                      <option value="">Select User</option>
+                      {users.map((user) => (
+                        <option key={user._id} value={user._id}>{user.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Project *
+                    </label>
+                    <select
+                      value={taskForm.project}
+                      onChange={(e) => setTaskForm({...taskForm, project: e.target.value})}
+                      className="input-field"
+                      required
+                    >
+                      <option value="">Select Project</option>
+                      {projects.map((project) => (
+                        <option key={project._id} value={project._id}>{project.title}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Due Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={taskForm.dueDate}
+                      onChange={(e) => setTaskForm({...taskForm, dueDate: e.target.value})}
+                      className="input-field"
+                      required
+                    />
                   </div>
 
                   <div>
@@ -413,8 +464,8 @@ const Projects: React.FC = () => {
                       Priority
                     </label>
                     <select
-                      value={projectForm.priority}
-                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value as any})}
+                      value={taskForm.priority}
+                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value,})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>
@@ -422,18 +473,6 @@ const Projects: React.FC = () => {
                       <option value="High">High</option>
                       <option value="Urgent">Urgent</option>
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Due Date
-                    </label>
-                    <input
-                      type="date"
-                      value={projectForm.dueDate}
-                      onChange={(e) => setProjectForm({...projectForm, dueDate: e.target.value})}
-                      className="input-field"
-                    />
                   </div>
 
                   <div className="flex justify-end space-x-3 pt-4">
@@ -448,7 +487,7 @@ const Projects: React.FC = () => {
                       type="submit"
                       className="btn-primary"
                     >
-                      Create Project
+                      Create Task
                     </button>
                   </div>
                 </form>
@@ -457,30 +496,30 @@ const Projects: React.FC = () => {
           </div>
         )}
 
-        {/* Edit Project Modal */}
+        {/* Edit Task Modal */}
         {showEditModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-md w-full max-h-screen overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Edit Project</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Edit Task</h2>
                   <button
-                    onClick={() => {setShowEditModal(false); setEditingProject(null); resetForm();}}
+                    onClick={() => {setShowEditModal(false); setEditingTask(null); resetForm();}}
                     className="text-gray-400 hover:text-gray-600"
                   >
                     <X className="h-6 w-6" />
                   </button>
                 </div>
 
-                <form onSubmit={handleUpdateProject} className="space-y-4">
+                <form onSubmit={handleUpdateTask} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Title *
                     </label>
                     <input
                       type="text"
-                      value={projectForm.title}
-                      onChange={(e) => setProjectForm({...projectForm, title: e.target.value})}
+                      value={taskForm.title}
+                      onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
                       className="input-field"
                       required
                     />
@@ -491,8 +530,8 @@ const Projects: React.FC = () => {
                       Description
                     </label>
                     <textarea
-                      value={projectForm.description}
-                      onChange={(e) => setProjectForm({...projectForm, description: e.target.value})}
+                      value={taskForm.description}
+                      onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
                       className="input-field"
                       rows={3}
                     />
@@ -500,19 +539,48 @@ const Projects: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
+                      Status *
                     </label>
                     <select
-                      value={projectForm.status}
-                      onChange={(e) => setProjectForm({...projectForm, status: e.target.value as any})}
+                      value={taskForm.status}
+                      onChange={(e) => setTaskForm({...taskForm, status: e.target.value,})}
                       className="input-field"
+                      required
                     >
-                      <option value="Planning">Planning</option>
+                      <option value="Todo">Todo</option>
                       <option value="In Progress">In Progress</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Cancelled">Cancelled</option>
+                      <option value="Done">Done</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned To *
+                    </label>
+                    <select
+                      value={taskForm.assignedTo}
+                      onChange={(e) => setTaskForm({...taskForm, assignedTo: e.target.value})}
+                      className="input-field"
+                      required
+                    >
+                      <option value="">Select User</option>
+                      {users.map((user) => (
+                        <option key={user._id} value={user._id}>{user.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Due Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={taskForm.dueDate}
+                      onChange={(e) => setTaskForm({...taskForm, dueDate: e.target.value})}
+                      className="input-field"
+                      required
+                    />
                   </div>
 
                   <div>
@@ -520,8 +588,8 @@ const Projects: React.FC = () => {
                       Priority
                     </label>
                     <select
-                      value={projectForm.priority}
-                      onChange={(e) => setProjectForm({...projectForm, priority: e.target.value as any})}
+                      value={taskForm.priority}
+                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value,})}
                       className="input-field"
                     >
                       <option value="Low">Low</option>
@@ -531,22 +599,10 @@ const Projects: React.FC = () => {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Due Date
-                    </label>
-                    <input
-                      type="date"
-                      value={projectForm.dueDate}
-                      onChange={(e) => setProjectForm({...projectForm, dueDate: e.target.value})}
-                      className="input-field"
-                    />
-                  </div>
-
                   <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => {setShowEditModal(false); setEditingProject(null); resetForm();}}
+                      onClick={() => {setShowEditModal(false); setEditingTask(null); resetForm();}}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                     >
                       Cancel
@@ -555,7 +611,7 @@ const Projects: React.FC = () => {
                       type="submit"
                       className="btn-primary"
                     >
-                      Update Project
+                      Update Task
                     </button>
                   </div>
                 </form>
@@ -568,4 +624,4 @@ const Projects: React.FC = () => {
   );
 };
 
-export default Projects;
+export default Tasks;

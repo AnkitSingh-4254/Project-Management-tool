@@ -17,7 +17,7 @@ import {
   Settings
 } from 'lucide-react';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,15 +35,11 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const isActiveRoute = (path: string) => {
+  const isActiveRoute = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const NavLink: React.FC<{ to: string; children: React.ReactNode; className?: string }> = ({ 
-    to, 
-    children, 
-    className = '' 
-  }) => (
+  const NavLink = ({ to, children, className = '' }) => (
     <Link
       to={to}
       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${

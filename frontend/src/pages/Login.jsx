@@ -8,13 +8,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 
-const Login: React.FC = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
     if (error) setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
@@ -45,7 +45,7 @@ const Login: React.FC = () => {
     try {
       await login(formData.email, formData.password);
       // Navigation will be handled by the useEffect hook
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login failed:', error);
       setError(
         error.response?.data?.message || 

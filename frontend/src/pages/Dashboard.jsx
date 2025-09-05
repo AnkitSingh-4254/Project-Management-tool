@@ -18,13 +18,13 @@ import {
   Users
 } from 'lucide-react';
 
-const Dashboard: React.FC = () => {
+const Dashboard= () => {
   const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [myTasks, setMyTasks] = useState<Task[]>([]);
-  const [overdueTasks, setOverdueTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState([]);
+  const [myTasks, setMyTasks] = useState([]);
+  const [overdueTasks, setOverdueTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadDashboardData();
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
       if (overdueRes.success && overdueRes.data) {
         setOverdueTasks(overdueRes.data.tasks);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to load dashboard data:', error);
       setError('Failed to load dashboard data. Please refresh the page.');
     } finally {

@@ -3,29 +3,14 @@
  * Manages user authentication state and provides auth-related functions
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI, User } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authAPI } from '../services/api';
 
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (userData: { name: string; email: string; password: string; department?: string }) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => void;
-}
+const AuthContext = createContext();
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user && !!token;
@@ -73,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email, password) => {
     try {
       setIsLoading(true);
       const response = await authAPI.login({ email, password });
@@ -91,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         throw new Error(response.message || 'Login failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login error:', error);
       throw error;
     } finally {
@@ -99,12 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (userData: { 
-    name: string; 
-    email: string; 
-    password: string; 
-    department?: string 
-  }): Promise<void> => {
+  const signup = async (userData) => {
     try {
       setIsLoading(true);
       const response = await authAPI.signup(userData);
@@ -122,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         throw new Error(response.message || 'Signup failed');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Signup error:', error);
       throw error;
     } finally {
@@ -130,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const logout = async () => {
     try {
       setIsLoading(true);
       
@@ -161,7 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateUser = (userData: Partial<User>) => {
+  const updateUser = (userData) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
@@ -169,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value: AuthContextType = {
+  const value = {
     user,
     token,
     isLoading,
@@ -188,7 +168,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 };
 
 // Custom hook to use auth context
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

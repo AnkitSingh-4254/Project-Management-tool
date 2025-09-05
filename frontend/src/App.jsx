@@ -16,11 +16,7 @@ import Tasks from './pages/Tasks';
 import Projects from './pages/Projects';
 
 // Protected Route Component
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -35,11 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 };
 
 // Public Route Component (redirects to dashboard if already authenticated)
-interface PublicRouteProps {
-  children: React.ReactNode;
-}
-
-const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
+const PublicRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -54,7 +46,7 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 };
 
 // App Layout Component
-const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AppLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -64,7 +56,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 // Main App Component
-const App: React.FC = () => {
+const App = () => {
   return (
     <Router>
       <AuthProvider>
